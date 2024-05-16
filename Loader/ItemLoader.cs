@@ -81,7 +81,7 @@ namespace Loader
 				EntityClassDefinition magazine = null;
 				if (!String.IsNullOrEmpty(entity.Components?.SCItemWeaponComponentParams?.ammoContainerRecord))
 				{
-					magazine = entitySvc.GetByReference(entity.Components.SCItemWeaponComponentParams.ammoContainerRecord);
+					magazine = entitySvc.GetByReference(entity.Components?.SCItemWeaponComponentParams.ammoContainerRecord);
 				}
 
 				// If it is an ammo container or if it has a magazine then load the ammo properties
@@ -102,14 +102,14 @@ namespace Loader
 				DamageResistance damageResistances = null;
 				if (!String.IsNullOrEmpty(entity.Components?.SCItemSuitArmorParams?.damageResistance))
 				{
-					var damageMacro = damageResistanceMacros.Find(y => y.__ref == entity.Components.SCItemSuitArmorParams.damageResistance);
+					var damageMacro = damageResistanceMacros.Find(y => y.__ref == entity.Components?.SCItemSuitArmorParams.damageResistance);
 					damageResistances = damageMacro?.damageResistance;
 				}
 
 				StandardisedInventoryContainer inventoryContainer = null;
 				if (!String.IsNullOrEmpty(entity.Components?.SCItemInventoryContainerComponentParams?.containerParams))
 				{
-					inventoryContainer = _inventoryContainerSvc.GetInventoryContainer(entity.Components.SCItemInventoryContainerComponentParams.containerParams);
+					inventoryContainer = _inventoryContainerSvc.GetInventoryContainer(entity.Components?.SCItemInventoryContainerComponentParams.containerParams);
 				}
 
 				var stdItem = itemBuilder.BuildItem(entity);

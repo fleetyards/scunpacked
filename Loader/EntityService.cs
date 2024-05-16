@@ -13,9 +13,9 @@ namespace Loader
 	{
 		public string OutputFolder { get; set; }
 		public string DataRoot { get; set; }
+		public Dictionary<string, string> referenceToClassNameMap;
 
 		Dictionary<string, string> classNameToFilenameMap;
-		Dictionary<string, string> referenceToClassNameMap;
 		Dictionary<string, string> classNameToTypeMap;
 		Dictionary<string, EntityClassDefinition> classNameToEntityMap;
 		ClassParser<EntityClassDefinition> entityParser = new ClassParser<EntityClassDefinition>();
@@ -122,12 +122,13 @@ namespace Loader
 			var entity = LoadEntity(filename);
 			if (entity == null) return null;
 
-            if (!classNameToFilenameMap.ContainsKey(entity.ClassName)) {
-                classNameToFilenameMap.Add(entity.ClassName, filename);
-                referenceToClassNameMap.Add(entity.__ref, entity.ClassName);
-                classNameToEntityMap.Add(entity.ClassName, entity);
-                classNameToTypeMap.Add(entity.ClassName, entity.Components.SAttachableComponentParams?.AttachDef.Type ?? "");
-            }
+			if (!classNameToFilenameMap.ContainsKey(entity.ClassName))
+			{
+				classNameToFilenameMap.Add(entity.ClassName, filename);
+				referenceToClassNameMap.Add(entity.__ref, entity.ClassName);
+				classNameToEntityMap.Add(entity.ClassName, entity);
+				classNameToTypeMap.Add(entity.ClassName, entity.Components?.SAttachableComponentParams?.AttachDef.Type ?? "");
+			}
 
 			return entity;
 		}

@@ -25,6 +25,7 @@ namespace Loader
 			{
 				PortName = cigLoadoutEntry.itemPortName,
 				ClassName = cigLoadoutEntry.entityClassName,
+				ClassReference = cigLoadoutEntry.entityClassReference,
 				Entries = new List<StandardisedLoadoutEntry>()
 			};
 

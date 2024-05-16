@@ -56,12 +56,19 @@ namespace Loader
 		public void InstallLoadout(SItemPortDef port, List<StandardisedLoadoutEntry> loadout)
 		{
 			var loadoutEntry = FindLoadoutEntry(port.Name, loadout);
-			if (String.IsNullOrEmpty(loadoutEntry?.ClassName)) return;
 
-			var item = entitySvc.GetByClassName(loadoutEntry.ClassName);
-			if (item == null) return;
+			if (!String.IsNullOrEmpty(loadoutEntry?.ClassName))
+			{
+				var item = entitySvc.GetByClassName(loadoutEntry.ClassName);
 
-			port.EquippedItemUuid = item.__ref;
+				if (item == null) return;
+
+				port.EquippedItemUuid = item.__ref;
+			}
+			else if (!String.IsNullOrEmpty(loadoutEntry?.ClassReference))
+			{
+				port.EquippedItemUuid = loadoutEntry?.ClassReference;
+			}
 		}
 
 		public void InstallLoadout(List<StandardisedItemPort> ports, List<StandardisedLoadoutEntry> loadout)
@@ -75,22 +82,43 @@ namespace Loader
 		public void InstallLoadout(StandardisedItemPort port, List<StandardisedLoadoutEntry> loadout)
 		{
 			var loadoutEntry = FindLoadoutEntry(port.PortName, loadout);
-			if (String.IsNullOrEmpty(loadoutEntry?.ClassName)) return;
+			if (!String.IsNullOrEmpty(loadoutEntry?.ClassName))
+			{
+				port.Loadout = loadoutEntry.ClassName;
+				var item = entitySvc.GetByClassName(loadoutEntry.ClassName);
 
-			port.Loadout = loadoutEntry.ClassName;
+				if (item == null) return;
 
-			var item = entitySvc.GetByClassName(loadoutEntry.ClassName);
-			if (item == null) return;
+				var standardisedItem = itemBuilder.BuildItem(item);
 
-			var standardisedItem = itemBuilder.BuildItem(item);
+				port.InstalledItem = standardisedItem;
 
-			port.InstalledItem = standardisedItem;
+				// Update the loadout with anything this item brings with it
+				var newLoadout = loadoutLoader.Load(item);
+				loadoutEntry.Entries.AddRange(newLoadout);
 
-			// Update the loadout with anything this item brings with it
-			var newLoadout = loadoutLoader.Load(item);
-			loadoutEntry.Entries.AddRange(newLoadout);
+				InstallLoadout(standardisedItem.Ports, loadoutEntry.Entries);
+			}
+			else if (!String.IsNullOrEmpty(loadoutEntry?.ClassReference))
+			{
+				var item = entitySvc.GetByReference(loadoutEntry.ClassReference);
 
-			InstallLoadout(standardisedItem.Ports, loadoutEntry.Entries);
+				if (item == null) return;
+
+				if (!entitySvc.referenceToClassNameMap.ContainsKey(loadoutEntry.ClassReference)) return;
+
+				port.Loadout = entitySvc.referenceToClassNameMap[loadoutEntry.ClassReference];
+
+				var standardisedItem = itemBuilder.BuildItem(item);
+
+				port.InstalledItem = standardisedItem;
+
+				// Update the loadout with anything this item brings with it
+				var newLoadout = loadoutLoader.Load(item);
+				loadoutEntry.Entries.AddRange(newLoadout);
+
+				InstallLoadout(standardisedItem.Ports, loadoutEntry.Entries);
+			}
 		}
 
 		StandardisedLoadoutEntry FindLoadoutEntry(string portName, List<StandardisedLoadoutEntry> loadout)
